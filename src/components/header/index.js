@@ -3,12 +3,9 @@ import styled from "styled-components"
 import { Flex } from "@netdata/netdata-ui"
 import Node from "./node"
 import Options from "./options"
-import Version from "./version"
 import GlobalControls from "./globalControls"
 import Alarms from "./alarms"
-import News from "./news"
 import Timezone from "./timezone"
-import SignIn from "./signIn"
 
 const Wrapper = styled(Flex).attrs({
   as: "header",
@@ -28,13 +25,10 @@ const Header = () => (
       <Node />
     </Flex>
     <Flex justifyContent="end" alignItems="center" gap={3}>
-      <Version />
-      <News />
       <Options />
       <Timezone />
       <GlobalControls />
       <Alarms />
-      <SignIn />
     </Flex>
   </Wrapper>
 )
