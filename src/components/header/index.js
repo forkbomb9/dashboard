@@ -3,6 +3,7 @@ import styled from "styled-components"
 import { Flex } from "@netdata/netdata-ui"
 import Node from "./node"
 import Options from "./options"
+import ProtoBuf from "./protoBuf"
 import GlobalControls from "./globalControls"
 import Alarms from "./alarms"
 import Timezone from "./timezone"
@@ -26,6 +27,7 @@ const Header = () => (
     </Flex>
     <Flex justifyContent="end" alignItems="center" gap={3}>
       <Options />
+      <ProtoBuf />
       <Timezone />
       <GlobalControls />
       <Alarms />
