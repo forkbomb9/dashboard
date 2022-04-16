@@ -27,7 +27,6 @@ const Header = () => (
     </Flex>
     <Flex justifyContent="end" alignItems="center" gap={3}>
       <Options />
-      <ProtoBuf />
       <Timezone />
       <GlobalControls />
       <Alarms />

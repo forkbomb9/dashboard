@@ -8,7 +8,7 @@ export const ContentWrapper = props => (
   <Flex
     column
     height="100%"
-    padding={[2, 0, 2, 6]}
+    padding={[2, 0, 2, 4]}
     overflow={{ horizontal: "hidden" }}
     className="node-view__container"
     {...props}
@@ -23,6 +23,7 @@ const Provider = ({
   chartIds,
   theme,
   hasKubernetes,
+  composite,
   children,
 }) => {
   const ref = useRef()
@@ -45,6 +46,7 @@ const Provider = ({
               onAttributesChange={onAttributesChange}
               dashboardAttributes={dashboardAttributes}
               hasKubernetes={hasKubernetes}
+              composite={composite}
             >
               {children}
             </DashboardMenuProvider>
