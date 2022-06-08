@@ -45,6 +45,7 @@ import { mapTheme } from "utils/map-theme"
 import { netdataCallback, updateLocaleFunctions } from "./main"
 
 import { MigrationManager } from "@/src/domains/dashboard/components/migration-manager"
+import { isDemo } from "./utils/is-demo"
 
 // support legacy code
 window.Ps = Ps
@@ -120,7 +121,7 @@ const App: React.FC = () => {
       )}
       {chartsMetadata && cloudBaseURL && hasFetchedInfo && haveDOMReadyForParsing && (
         <Layout printMode={isPrintMode}>
-          <MigrationManager />
+          {isDemo ? null : <MigrationManager />}
           {hasFetchDependencies && (
             <>
               <Portals key={refreshHelper} />
