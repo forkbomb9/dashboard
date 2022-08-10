@@ -1,6 +1,6 @@
 import React from "react"
 import styled from "styled-components"
-import { Flex } from "@netdata/netdata-ui"
+import { Flex, Box } from "@netdata/netdata-ui"
 import Node from "./node"
 import Options from "./options"
 import ProtoBuf from "./protoBuf"

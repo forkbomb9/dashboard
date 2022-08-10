@@ -1,8 +1,6 @@
 //@ts-nocheck
 import { sortBy, reverse } from "ramda"
-import React, {
-  useLayoutEffect, useRef, useCallback, useState,
-} from "react"
+import React, { useLayoutEffect, useRef, useCallback } from "react"
 import classNames from "classnames"
 import { useUpdateEffect, useUnmount, useMount } from "react-use"
 // this version is needed because it contains a fix for handling constant value in the chart
@@ -17,7 +15,6 @@ import { DygraphArea, NetdataDygraph } from "types/vendor-overrides"
 import { TimeRange } from "types/common"
 import { useDateTime } from "utils/date-time"
 import { debounce } from "utils/debounce"
-import { hasHashParam } from "utils/hash-utils"
 
 import {
   selectCommonMin,
@@ -28,11 +25,14 @@ import {
   selectSyncPanAndZoom,
   selectSpacePanelTransitionEndIsActive,
   selectAlarm,
-  selectTimezoneSetting
+  selectTimezoneSetting,
 } from "domains/global/selectors"
 import {
-  resetGlobalPanAndZoomAction, setCommonMaxAction, setCommonMinAction,
-  setGlobalPauseAction, resetGlobalPauseAction
+  resetGlobalPanAndZoomAction,
+  setCommonMaxAction,
+  setCommonMinAction,
+  setGlobalPauseAction,
+  resetGlobalPauseAction,
 } from "domains/global/actions"
 
 import { resetChartPanAndZoomAction } from "domains/chart/actions"
@@ -47,7 +47,10 @@ import { ChartMetadata, DygraphData } from "../../chart-types"
 import { selectResizeHeight } from "../../selectors"
 
 import {
-  getDygraphChartType, getDataForFakeStacked, transformColors, getDygraphFillAlpha,
+  getDygraphChartType,
+  getDataForFakeStacked,
+  transformColors,
+  getDygraphFillAlpha,
   hackDygraphIFrameTarps,
 } from "./dygraph/utils"
 import "./dygraph-chart.css"
@@ -56,7 +59,6 @@ import useProceededChart from "../../hooks/use-proceeded-chart"
 import useDygraphBadge from "../../hooks/useDygraphBadge"
 import ProceededChartDisclaimer from "./proceeded-chart-disclaimer"
 import AlarmBadge, { getBorderColor } from "./alarmBadge"
-import NeutralPill from "./neutralPill"
 
 // This is the threshold above which we assume chart shown duration has changed
 const timeframeThreshold = 5000
@@ -248,7 +250,7 @@ const getInitialDygraphOptions = ({
     axes: {
       x: {
         pixelsPerLabel: dygraphXPixelsPerLabel,
-        // unsufficient typings for Dygraph
+        // insufficient typings for Dygraph
         // @ts-ignore
         ticker: Dygraph.dateTicker,
         axisLabelWidth: dygraphXAxisLabelWidth,
@@ -413,7 +415,6 @@ export const DygraphChart = ({
   }, [chartUuid, dispatch, isSyncPanAndZoom])
 
   const [isAlarmBadgeVisible, alarmBadgeRef, updateAlarmBadge] = useDygraphBadge() as any
-  const [isHighlightBadgeVisible, highlightBadgeRef, updateHighlightBadge] = useDygraphBadge() as any
 
   // setGlobalChartUnderlay is using state from closure (chartData.after), so we need to have always
   // the newest callback. Unfortunately we cannot use Dygraph.updateOptions() (library restriction)
@@ -428,7 +429,6 @@ export const DygraphChart = ({
     resetGlobalPanAndZoom,
     setGlobalChartUnderlay,
     updateAlarmBadge,
-    updateHighlightBadge,
     updateChartPanOrZoom,
     viewAfter,
     viewBefore,
@@ -447,14 +447,22 @@ export const DygraphChart = ({
     propsRef.current.resetGlobalPanAndZoom = resetGlobalPanAndZoom
     propsRef.current.setGlobalChartUnderlay = setGlobalChartUnderlay
     propsRef.current.updateAlarmBadge = updateAlarmBadge
-    propsRef.current.updateHighlightBadge = updateHighlightBadge
     propsRef.current.updateChartPanOrZoom = updateChartPanOrZoom
     propsRef.current.viewAfter = viewAfter
     propsRef.current.viewBefore = viewBefore
-  }, [alarm, chartData, globalChartUnderlay, hoveredX, immediatelyDispatchPanAndZoom,
-    resetGlobalPanAndZoom, setGlobalChartUnderlay, updateAlarmBadge, updateHighlightBadge, updateChartPanOrZoom, viewAfter, viewBefore])
-
-  const [localHighlight, setLocalHighlight] = useState<{before?: number, after?: number} | null>(null)
+  }, [
+    alarm,
+    chartData,
+    globalChartUnderlay,
+    hoveredX,
+    immediatelyDispatchPanAndZoom,
+    resetGlobalPanAndZoom,
+    setGlobalChartUnderlay,
+    updateAlarmBadge,
+    updateChartPanOrZoom,
+    viewAfter,
+    viewBefore,
+  ])
 
   const shouldSmoothPlot = useSelector(selectSmoothPlot)
   useLayoutEffect(() => {
@@ -561,29 +569,6 @@ export const DygraphChart = ({
             )
           }
 
-          const onMetricsCorralation = hasHashParam("metrics_correlation")
-          if (onMetricsCorralation && propsRef.current.globalChartUnderlay) {
-            const { before, masterID } = propsRef.current.globalChartUnderlay
-
-            if (masterID && masterID !== propsRef.current.chartData.id) {
-              propsRef.current.updateHighlightBadge(false)
-            } else {
-              const horizontalPadding = 3
-
-              propsRef.current.updateHighlightBadge(
-                true,
-                g,
-                g.toDomXCoord(before),
-                (pillRef, pillX, pillPosition, topMargin) => {
-                  pillRef.current.style.left = `${pillPosition + horizontalPadding}px`
-                  pillRef.current.style.top = topMargin
-                }
-              )
-            }
-          } else {
-            propsRef.current.updateHighlightBadge(false)
-          }
-
           // the chart is about to be drawn
           // this function renders global highlighted time-frame
 
@@ -669,28 +654,6 @@ export const DygraphChart = ({
               latestIsUserAction.current = true
               // @ts-ignore
               Dygraph.moveZoom(event, dygraph, context)
-
-              const onMetricsCorralation = hasHashParam("metrics_correlation")
-              if (onMetricsCorralation) {
-                const before = dygraph.toDataXCoord(event.offsetX)
-                const after = dygraphHighlightAfter.current
-                if (before - after > 1000) { // more than a sec
-                  setLocalHighlight({
-                    after,
-                    before,
-                  })
-                  propsRef.current.updateHighlightBadge(
-                    true,
-                    dygraph,
-                    dygraph.toDomXCoord(before),
-                    (pillRef, pillX, pillPosition, topMargin) => {
-                      pillRef.current.style.left = `${pillPosition}px`
-                      pillRef.current.style.top = topMargin
-                    }
-                  )
-                }
-              }
-
               event.preventDefault()
             } else if (context.isPanning) {
               latestIsUserAction.current = true
@@ -718,7 +681,6 @@ export const DygraphChart = ({
                 masterID: chartData.id,
               })
               dygraphHighlightAfter.current = null
-              setLocalHighlight(null)
               // eslint-disable-next-line no-param-reassign
               context.isZooming = false
 
@@ -732,13 +694,11 @@ export const DygraphChart = ({
               // eslint-disable-next-line no-underscore-dangle
               dygraph.drawGraph_(false)
             } else if (context.isPanning) {
-
               latestIsUserAction.current = true
               // @ts-ignore
               Dygraph.endPan(event, dygraph, context)
               propsRef.current.immediatelyDispatchPanAndZoom()
             } else if (context.isZooming) {
-
               latestIsUserAction.current = true
               // @ts-ignore
               Dygraph.endZoom(event, dygraph, context)
@@ -1205,11 +1165,12 @@ export const DygraphChart = ({
       )}
       {alarm?.value && hasLegend && (
         // @ts-ignore
-        <AlarmBadge isVisible={isAlarmBadgeVisible} ref={alarmBadgeRef} status={alarm.status} label={alarm.value} />
-      )}
-      {hasLegend && (
-        // @ts-ignore
-        <NeutralPill isVisible={isHighlightBadgeVisible} ref={highlightBadgeRef} {...globalChartUnderlay} {...localHighlight} />
+        <AlarmBadge
+          isVisible={isAlarmBadgeVisible}
+          ref={alarmBadgeRef}
+          status={alarm.status}
+          label={alarm.value}
+        />
       )}
       <div className="dygraph-chart__labels-hidden" id={hiddenLabelsElementId} />
     </>

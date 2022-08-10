@@ -30,14 +30,10 @@ export default (
     return emit({ menuPattern })
   }
 
-  if (clusterName) return emit({ menu: `Kubernetes ${clusterName}` })
-  else if (clusterId) return emit({ menu: `Kubernetes ${clusterId}` })
-
   switch (part1) {
     case "ap":
     case "net":
     case "powersupply":
-    case "statsd":
       return emit({ menu: part1 })
 
     case "cpufreq":
@@ -67,7 +63,29 @@ export default (
       return emit({ menu: part1 })
     }
 
+    case "k8s": {
+      if (composite) {
+        if (part2 == "state") {
+          if (clusterName) return emit({ menu: `Kubernetes State ${clusterName}` })
+          else if (clusterId) return emit({ menu: `Kubernetes State ${clusterId}` })
+        }
+
+        if (part2 == "container") {
+          if (clusterName) return emit({ menu: `Kubernetes Containers ${clusterName}` })
+          else if (clusterId) return emit({ menu: `Kubernetes Containers ${clusterId}` })
+        }
+
+        return emit({ menu: `Kubernetes ${part2}` })
+      }
+
+      const menuPattern = parts.length > 1 ? part1 : undefined
+      return emit({ menuPattern })
+    }
+
     case "cgroup": {
+      if (clusterName) return emit({ menu: `Kubernetes Containers ${clusterName}` })
+      else if (clusterId) return emit({ menu: `Kubernetes Containers ${clusterId}` })
+
       const menuPattern =
         id.match(/.*[._/-:]qemu[._/-:]*/) || id.match(/.*[._/-:]kvm[._/-:]*/) ? "cgqemu" : "cgroup"
       const sectionTitle = parts.length === 1 ? "cgroups" : undefined

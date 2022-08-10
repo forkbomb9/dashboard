@@ -46,6 +46,9 @@ import { netdataCallback, updateLocaleFunctions } from "./main"
 
 import { MigrationManager } from "@/src/domains/dashboard/components/migration-manager"
 import { isDemo } from "./utils/is-demo"
+import { Box } from "@netdata/netdata-ui"
+
+const FakeMargin = Box
 
 // support legacy code
 window.Ps = Ps
@@ -119,16 +122,20 @@ const App: React.FC = () => {
         // styling will have smaller priority than bootstrap css
         <NotificationsContainer />
       )}
+      <></>
       {chartsMetadata && cloudBaseURL && hasFetchedInfo && haveDOMReadyForParsing && (
-        <Layout printMode={isPrintMode}>
-          {isDemo ? null : <MigrationManager />}
-          {hasFetchDependencies && (
-            <>
-              <Portals key={refreshHelper} />
-              {isPrintMode && <PrintModal />}
-            </>
-          )}
-        </Layout>
+        <>
+          <Layout printMode={isPrintMode}>
+            {isDemo ? null : <MigrationManager />}
+            {hasFetchDependencies && (
+              <>
+                <Portals key={refreshHelper} />
+                {isPrintMode && <PrintModal />}
+              </>
+            )}
+          </Layout>
+          <FakeMargin height={15} />
+        </>
       )}
     </ThemeProvider>
   )
